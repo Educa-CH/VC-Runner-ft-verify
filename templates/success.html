@@ -5,10 +5,10 @@
     <script>
         setTimeout(function() {
             window.location.href = '/';
-        }, 3500); // Wait for 5 seconds
+        }, 10000); // Wait for 10 seconds
     </script>
 {% endblock %}
 
 {% block index %}
-    <h2>Das Credential wurde erfolgreich übermittelt!</h2>
+    <h2>{{ prompt }}</h2>
 {% endblock %}

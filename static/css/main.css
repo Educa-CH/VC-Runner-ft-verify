@@ -1,4 +1,3 @@
-/* Center the body content */
 @font-face {
   font-weight: 400;
   font-family: "EducaSans";
@@ -29,7 +28,7 @@ body {
     height: 100vh;
     margin: 0;
 }
-
+  
 /* Style the header */
 header {
   background-color: rgb(255, 0, 58);
@@ -62,35 +61,98 @@ h6 {
   color: #101a3a;
   font-family: "EducaSans", Helvetica, sans-serif;
 }
-  
-h2 {
-  text-align: center;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
 
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-label, input, button {
-  font-family: "EducaSans", Helvetica, sans-serif;
-  margin: 10px;
-  font-size: 25px;
+/* Style the header */
+header {
+  background-color: rgb(205, 0, 58);
+  color: white;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
 }
 
+/* Style the header container */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Style the language links */
+.language-links {
+  display: flex;
+  margin-right: 30px;
+}
+
+/* Style the language links */
+.language-link {
+  color: white;
+  margin-left: 10px;
+  text-decoration: none;
+  font-family: "EducaSans", Helvetica, sans-serif;
+}
+
+.language-link:not(:first-child)::before {
+  content: " | ";
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+/* Style the footer */
+footer {
+  background-color: rgb(205, 0, 58);
+  font-family: "EducaSans", Helvetica, sans-serif;
+  color: white;
+  padding: 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+h1 {
+  font-weight: 300;
+}
+
+h2 {
+  text-align: center;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 30% 1fr; /* first column is 30% of total width */
+  grid-column-gap: 20px;
+  grid-row-gap: 10px;
+  align-items: center;
+  justify-items: start;
+}
+
+label {
+  grid-column: 1 / 2;
+}
+
+input {
+  grid-column: 2 / 3;
+  width: 100%;
+}
+
+button {
+  grid-column: 1 / -1;
+  width: calc(100%);
+}
   
-  
-  
-  
-  
+label, input, button {
+  font-family: "EducaSans", Helvetica, sans-serif;
+  font-size: larger;
+}
+
+img {
+  display: block;
+  margin: auto;
+}
+
+.red-text {
+  color: rgb(205, 0, 58);
+}

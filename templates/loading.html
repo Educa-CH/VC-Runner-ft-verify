@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block index %}
-    <h2>Bitte akzeptieren Sie das gesendedete Credential!</h2>
+    <h2>{{ prompt }}</h2>
     <br>
     <img src="{{ url_for('static', filename='images/giphy.gif') }}" class="center">
 {% endblock %}

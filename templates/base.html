@@ -9,9 +9,17 @@
         {% block head  %}{% endblock %}
     </head>
     <body>
-    <header id="header">
-        <h1><a href="/" style="color: white; text-decoration: none;">Educa</a> </h1>
-    </header>
+        <header id="header">
+            <div class="header-container">
+              <h1>
+                <a href="/" style="color: white; text-decoration: none;">Educa</a>
+              </h1>
+              <div class="language-links">
+                <a href="/de" class="language-link">de</a>
+                <a href="/fr" class="language-link">fr</a>
+              </div>
+            </div>
+          </header>
     <main id="main">
         {% block index %}
         {% endblock %}

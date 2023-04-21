@@ -13,7 +13,7 @@
                     success: function(data) {
                         if (data.status == 'connected') {
                             // Connection has been established, redirect to the next page
-                            window.location.href = '/name';
+                            window.location.href = '/verify';
                         }
                     }
                 });
@@ -25,7 +25,9 @@
 
 {% block index %}
 
-    <h2>Scanne den QR-Code</h2>
+    <h2>{{ prompt }}</h2>
+    <br>
+    <h3 class="red-text">{{ notice }}</h3>
     <img src="{{ url_for('static', filename='images/dynamic_url_qr.png') }}">
 
 {% endblock %}

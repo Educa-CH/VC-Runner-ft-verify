@@ -1,5 +1,8 @@
-from flask import Flask, render_template, jsonify, session, request
+from flask import Flask, render_template, jsonify, session, request, redirect, url_for
 from configparser import ConfigParser
+from flask_talisman import Talisman
+from flask_session import Session
+from flask_cors import CORS
 import qrcode
 import requests
 import json
@@ -7,27 +10,44 @@ import json
 
 app = Flask(__name__)
 
+CORS(app)
+
+talisman = Talisman(app, content_security_policy={
+    'default-src': ["'self'", "*", "'unsafe-inline'"]
+})
+
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
+
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_THRESHOLD'] = 500  # Set a threshold for the number of files before cleanup
+Session(app)
+
 config = ConfigParser()
 config.read('config.ini')
 app.secret_key = config.get('DEFAULT', 'SECRET_KEY', )
 connection_url = config.get('ENDPOINTS', 'CONNECTION_URL').strip("'")
-issuer_url = config.get('ENDPOINTS', 'ISSUER_URL').strip("'")
+verifier_url = config.get('ENDPOINTS', 'VERIFIER_URL').strip("'")
 cred_def = config.get('CREDENTIAL_DEFINITION', 'CREDENTIAL_DEFINITION').strip("'")
 attr1 = config.get('ATTRIBUTES', 'ATTR1').strip("'")
 attr2 = config.get('ATTRIBUTES', 'ATTR2').strip("'")
-attr3 = config.get('ATTRIBUTES', 'ATTR3').strip("'")
-value2 = config.get('VALUES', 'VALUE2').strip("'")
-value3 = config.get('VALUES', 'VALUE3').strip("'")
 
-# allow site to be embedded in educa.ch 
-# potentially used to emebed as iFrame
-    #@app.after_request
-    #def add_header(response):
-    #    response.headers['X-Frame-Options'] = 'ALLOW-FROM https://educa.ch'
-    #    return response
+@app.route('/de')
+def set_language_de():
+    session['lang'] = 'de'
+    return redirect(url_for('index'))
+
+@app.route('/fr')
+def set_language_fr():
+    session['lang'] = 'fr'
+    return redirect(url_for('index'))
+
 
 @app.route('/')
 def index():
+    if 'lang' not in session:
+        session['lang'] = 'de'
+
     url = connection_url+ '/connection/invitation'
     response = requests.post(url)
     data = json.loads(response.text)
@@ -39,7 +59,15 @@ def index():
     img = qr.make_image(fill_color="black", back_color="white")
     img.save("static/images/dynamic_url_qr.png")  # Save the QR code image to a file
 
-    return render_template('index.html', qr_image='static/images/dynamic_url_qr.png')
+        # Set the prompt based on the language
+    if session['lang'] == 'de':
+        prompt = 'Scannen Sie diesen QR-Code mit ihrer elektronischen Brieftasche (Lissie Wallet) und folgen Sie den weiteren Schritten in der App'
+        notice = 'Hinweis: Der Educa Agent dient nur zu Demonstrationszwecken und ist daher nicht verifiziert. Bitte nehmen Sie die Verbindungseinladung trotzdem an.'
+    elif session['lang'] == 'fr':
+        prompt = 'Veuillez scanner le QR code avec votre application de portefeuille'
+        notice = 'Note: L\'agent Educa est uniquement à des fins de démonstration et n\'est donc pas vérifié. Veuillez tout de même accepter l\'invitation de connexion.'
+
+    return render_template('index.html', qr_image='static/images/dynamic_url_qr.png', prompt=prompt, notice=notice)
 
 @app.route('/check_connection/')
 def check_connection():
@@ -53,47 +81,47 @@ def check_connection():
         # Connection has not been established
         return jsonify({'status': 'not connected'})
 
-@app.route('/name', methods=['POST', 'GET'])      
+@app.route('/verify')      
 def name():
-    if request.method == 'POST':
-        name = request.form['name']
-        url = issuer_url + '/issue/process'
-        data = {
-            "connectionId": session['connection'],
-            "credentialDefinitionId": cred_def,
-            "attributes": {
-                attr1: name,
-                attr2: value2,
-                attr3: value3
-            },
-            "userId": "Anonymous"
-        }
-        print(data)
+    url = verifier_url + '/verify/process'
+    data = {
+        "credentialDefinitionId": cred_def,
+        "attributes": [
+            attr1,
+            attr2
+        ],
+        "connectionId": session['connection']
+    }
+    print(data)
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(
+        url,
+        json=data,
+        headers=headers)
+    
+    print(response.text)
 
-        headers = {"Content-Type": "application/json"}
+    if response.status_code == 200:
+        data = json.loads(response.text)
+        session['processId'] = data['processId']
 
-        response = requests.post(
-            url,
-            json=data,
-            headers=headers)
+        if session['lang'] == 'de':
+            prompt = 'Bitte beantworten Sie die Informationsanfrage in ihrer elektronischen Brieftasche (Lissi Wallet)'
+            notice = 'Hinweis: Der Educa Agent dient nur zu Demonstrationszwecken und ist daher nicht verifiziert. Bitte nehmen Sie den digitalen Nachweis trotzdem an.'
+        elif session['lang'] == 'fr':
+            prompt = 'Veuillez répondre à la demande d\'informations dans votre portefeuille électronique (Lissi Wallet)'  
+            notice = 'Note: L\'agent Educa est uniquement à des fins de démonstration et n\'est donc pas vérifié. Veuillez tout de même accepter le certificat numérique.' 
 
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            session['processId'] = data['processId']
-
-            return render_template('loading.html')
-
-        else:
-            return render_template('failure.html')    
+        return render_template('loading.html', prompt=prompt, notice=notice)
     else:
-        #just show the page
-        return render_template('name.html')
+        return render_template('failure.html')    
+
 
 
 @app.route('/loading/')
 def loading():
     # Check the Acception status by making a GET request to the API endpoint
-    url = issuer_url+ '/issue/process/' + session['processId'] + '/state'
+    url = verifier_url+ '/verify/process/' + session['processId'] + '/state'
     response = requests.get(url)
     if response.text != '"IN_PROGRESS"':
         # Credential has been accepted
@@ -104,8 +132,12 @@ def loading():
 
 @app.route('/success')
 def success():
-    return render_template('success.html')        
+    if session['lang'] == 'de':
+        prompt = 'Ihre Anmeldung wurde erfolgreich verifiziert. Herzlich Willkommen!'
+    elif session['lang'] == 'fr':
+        prompt = 'Votre inscription a été vérifiée avec succès. Bienvenue!'
+    return render_template('success.html', prompt=prompt)        
   
 
 if __name__ == "__main__":
-    app.run(debug=False)    
+    app.run(debug=True)    
