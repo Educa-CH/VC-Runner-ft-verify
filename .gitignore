@@ -11,7 +11,7 @@ env.bak/
 venv.bak/
 
 # QR Code
-/static/images/dynanic_url_qr.png
+static/images/dynamic_url_qr.png
 
 
 flask_session/*
