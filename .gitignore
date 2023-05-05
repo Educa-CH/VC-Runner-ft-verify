@@ -12,3 +12,8 @@ venv.bak/
 
 # QR Code
 /static/images/dynanic_url_qr.png
+
+
+flask_session/*
+
+logs/*
