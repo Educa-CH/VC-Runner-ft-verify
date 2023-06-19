@@ -62,12 +62,12 @@ def index():
         # Set the prompt based on the language
     if session['lang'] == 'de':
         prompt = 'Scannen Sie diesen QR-Code mit ihrer elektronischen Brieftasche (Lissie Wallet) und folgen Sie den weiteren Schritten in der App'
-        notice = 'Hinweis: Der Educa Agent dient nur zu Demonstrationszwecken und ist daher nicht verifiziert. Bitte nehmen Sie die Verbindungseinladung trotzdem an.'
+        
     elif session['lang'] == 'fr':
         prompt = 'Veuillez scanner le QR code avec votre application de portefeuille'
-        notice = 'Note: L\'agent Educa est uniquement à des fins de démonstration et n\'est donc pas vérifié. Veuillez tout de même accepter l\'invitation de connexion.'
+        
 
-    return render_template('index.html', qr_image='static/images/dynamic_url_qr.png', prompt=prompt, notice=notice)
+    return render_template('index.html', qr_image='static/images/dynamic_url_qr.png', prompt=prompt)
 
 @app.route('/check_connection/')
 def check_connection():
@@ -107,12 +107,12 @@ def name():
 
         if session['lang'] == 'de':
             prompt = 'Bitte beantworten Sie die Informationsanfrage in ihrer elektronischen Brieftasche (Lissi Wallet)'
-            notice = 'Hinweis: Der Educa Agent dient nur zu Demonstrationszwecken und ist daher nicht verifiziert. Bitte nehmen Sie den digitalen Nachweis trotzdem an.'
+            
         elif session['lang'] == 'fr':
             prompt = 'Veuillez répondre à la demande d\'informations dans votre portefeuille électronique (Lissi Wallet)'  
-            notice = 'Note: L\'agent Educa est uniquement à des fins de démonstration et n\'est donc pas vérifié. Veuillez tout de même accepter le certificat numérique.' 
+            
 
-        return render_template('loading.html', prompt=prompt, notice=notice)
+        return render_template('loading.html', prompt=prompt)
     else:
         return render_template('failure.html')    
 
