@@ -1,4 +1,4 @@
-bind = "verify-ft.educa.ch:443"
+bind = "verify-ft.educa.ch:444"
 certfile = "/usr/local/share/certs/educa.ch/fullchain.pem"
 keyfile = "/usr/local/share/certs/educa.ch/privkey.pem"
 workers = 2  # Number of worker processes to spawn
